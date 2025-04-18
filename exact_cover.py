@@ -5,6 +5,14 @@ __all__ = ["ExactCover"]
 
 
 class Data[Co, Ca]:
+    """
+    Elements of the cover matrix A are represented as a data object, with fields l, r, u, d.
+    Rows of the matrix are doubly linked as circular lists via the l and r fields (left and right);
+    columns are doubly linked as circular lists via the u and d fields (up and down).
+
+    Columns track the column header, and rows track the row header.
+    """
+
     def __init__(
         self,
         constraint: "Constraint[Co,Ca]",
@@ -38,6 +46,12 @@ class Data[Co, Ca]:
 
 
 class Constraint[Co, Ca](Data[Co, Ca]):
+    """
+    Column header, storing the value and the column size (number of data items in the column).
+
+    The value can be anything meaningful to the user.
+    """
+
     l: Self
     r: Self
     d: Data[Co, Ca]
@@ -59,10 +73,12 @@ class Constraint[Co, Ca](Data[Co, Ca]):
             yield data
 
     def cover(self):
+        # Remove column from matrix
         self.r.l = self.l
         self.l.r = self.r
 
         for i in self.down():
+            # Remove row from matrix, but preserve this column's references
             for j in i.right(skip_self=True):
                 j.d.u = j.u
                 j.u.d = j.d
@@ -73,9 +89,11 @@ class Constraint[Co, Ca](Data[Co, Ca]):
     def uncover(self):
         for i in self.up():
             for j in i.left():
+                # Restore row to matrix
                 j.constraint.size += 1  # increase counter for constraint
                 j.d.u = j.u.d = j
 
+        # Restore column to matrix
         self.r.l = self.l.r = self
 
     def __str__(self):
@@ -141,23 +159,35 @@ class ExactCover[Co, Ca]:
 
         con: Constraint[Co, Ca] = root
         for v in constraints:
+            # Constraints are the column headers of our matrix.
+            # Constraint is saved in root for convenience.
+            # Append to row: col.r.l = col.r = Constraint(l=con, r=con.r)
             root.constraints[v] = con.r.l = con.r = con = Constraint[Co, Ca](
                 value=v, l=con, r=con.r
             )
 
         can: Candidate[Co, Ca] = root
         for candidate, constraint_set in candidates:
+            # Candidates are the row headers of our matrix.
+            # Candidate is saved in root for use in searching when given initial values.
+            # Append to column: can.d.u = can.d = Candidate(u=can, d=can.d)
             root.candidates[candidate] = can.d.u = can.d = can = Candidate(
                 value=candidate, u=can, d=can.d
             )
             data: Data[Co, Ca] = can
             for v in constraint_set:
+                # Lookup constraint by value
                 con = self.root.constraints[v]
+                # Append to column: con.d.u = con.d = Data(u=con, d=con.d)
+                # Append to row: data.r.l = data.r = Data(l=data, r=data.r)
                 con.u.d = con.u = data.r.l = data.r = data = Data(
                     candidate=can, constraint=con, u=con.u, d=con, l=data, r=data.r
                 )
+
+                # Increase constraint candidate count
                 con.size += 1
 
+            # Remove candidate from data row. (Candidate still access data)
             can.l.r = can.r
             can.r.l = can.l
 
@@ -171,6 +201,7 @@ class ExactCover[Co, Ca]:
             return (yield tuple(O))
 
         response = None
+        # Cover constraint with fewest candidates to minimize branching
         constraint = min(self.root.right(), key=lambda e: e.size).cover()
         for row in constraint.down():
             for d in row.right(skip_self=True):
@@ -200,5 +231,6 @@ class ExactCover[Co, Ca]:
         try:
             yield from self.__search(initial)
         finally:
+            # Restore engine so it can be used for another search
             while covered:
                 covered.pop().uncover()
