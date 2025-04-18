@@ -47,7 +47,6 @@ class Constraint[Co, Ca](Data[Co, Ca]):
         super().__init__(constraint=None, candidate=None, l=l, r=r)
         self.value = value
         self.size = int(0)
-        self.covered = False
 
     def down(self):
         data = self
@@ -60,9 +59,6 @@ class Constraint[Co, Ca](Data[Co, Ca]):
             yield data
 
     def cover(self):
-        assert not self.covered, "Already covered"
-        self.covered = True
-
         self.r.l = self.l
         self.l.r = self.r
 
@@ -75,8 +71,6 @@ class Constraint[Co, Ca](Data[Co, Ca]):
         return self
 
     def uncover(self):
-        self.covered = False
-
         for i in self.up():
             for j in i.left():
                 j.constraint.size += 1  # increase counter for constraint
