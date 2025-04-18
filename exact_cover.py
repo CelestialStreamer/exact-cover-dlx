@@ -236,8 +236,14 @@ class ExactCover[Co, Ca]:
         )
 
         try:
-            yield from self.__search(initial)
+            g = self.__search(initial)
+            for solution in g:
+                yield solution
         finally:
             # Restore engine so it can be used for another search
+            try:
+                g.send("Stop")  # Uncover constraints if early exit
+            except StopIteration:
+                pass
             while covered:
                 covered.pop().uncover()
