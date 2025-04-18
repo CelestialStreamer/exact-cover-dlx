@@ -157,6 +157,11 @@ class ExactCover[Co, Ca]:
             can.l.r = can.r
             can.r.l = can.l
 
+        # TODO: Remove constraint from data columns:
+        # for con in root.right():
+        #     con.d.u = con.u
+        #     con.u.d = con.d
+
     def __search(self, O=deque[Ca]()) -> Generator[tuple[Ca], Any | None, Any | None]:
         if self.root.r == self.root:
             return (yield tuple(O))
