@@ -1,5 +1,5 @@
 from collections import deque
-from typing import Any, Generator, Iterable, Optional, Self
+from typing import Iterable, Optional, Self
 
 __all__ = ["ExactCover"]
 
@@ -132,7 +132,11 @@ class Root[Ca, Co](Data[Ca, Co]):
 
 
 class ExactCover[Co, Ca]:
-    def __init__(self, constraints: Iterable[Co], candidates: dict[Ca, Iterable[Co]]):
+    def __init__(
+        self,
+        constraints: Iterable[Co],
+        candidates: Iterable[tuple[Ca, Iterable[Co]]],
+    ):
         self.root = root = Root[Co, Ca]()
 
         con: Constraint[Co, Ca] = root
@@ -142,7 +146,7 @@ class ExactCover[Co, Ca]:
             )
 
         can: Candidate[Co, Ca] = root
-        for candidate, constraint_set in candidates.items():
+        for candidate, constraint_set in candidates:
             root.candidates[candidate] = can.d.u = can.d = can = Candidate(
                 value=candidate, u=can, d=can.d
             )
@@ -162,7 +166,7 @@ class ExactCover[Co, Ca]:
         #     con.d.u = con.u
         #     con.u.d = con.d
 
-    def __search(self, O=deque[Ca]()) -> Generator[tuple[Ca], Any | None, Any | None]:
+    def __search(self, O: deque[Ca]):
         if self.root.r == self.root:
             return (yield tuple(O))
 
@@ -185,9 +189,8 @@ class ExactCover[Co, Ca]:
         constraint.uncover()
         return response
 
-    def search(
-        self, initial: Iterable[Ca] = list[Ca]()
-    ) -> Generator[tuple[Ca], Any | None, Any | None]:
+    def search(self, initial: Iterable[Ca] = list[Ca]()):
+        initial = deque(initial)
         covered = deque(
             data.constraint.cover()
             for candidate in initial
