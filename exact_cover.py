@@ -25,12 +25,12 @@ class Data[Co, Ca]:
         data = self
         if not skip_self:
             yield data
-        while (data := data.l) is not self:
+        while (data := data.r) is not self:
             yield data
 
     def left(self):
         data = self
-        while (data := data.r) is not self:
+        while (data := data.l) is not self:
             yield data
 
     def __repr__(self):
@@ -125,7 +125,7 @@ class Root[Ca, Co](Data[Ca, Co]):
 
     def right(self):
         constraint = self
-        while (constraint := constraint.l) is not self:
+        while (constraint := constraint.r) is not self:
             yield constraint
 
     def down(self):
@@ -143,28 +143,25 @@ class ExactCover[Co, Ca]:
 
         con: Constraint[Co, Ca] = root
         for v in constraints:
-            root.constraints[v] = con.l.r = con.l = con = Constraint[Co, Ca](
-                v, l=con.l, r=con
+            root.constraints[v] = con.r.l = con.r = con = Constraint[Co, Ca](
+                value=v, l=con, r=con.r
             )
 
         can: Candidate[Co, Ca] = root
         for candidate, constraint_set in candidates.items():
-            can.u.d = can.u = can = Candidate[Co, Ca](value=candidate, u=can.u, d=can)
-            self.root.candidates[candidate] = can
-            data: Data[Co, Ca] | None = None
+            root.candidates[candidate] = can.d.u = can.d = can = Candidate(
+                value=candidate, u=can, d=can.d
+            )
+            data: Data[Co, Ca] = can
             for v in constraint_set:
-                con = root.constraints[v]
-                if data is None:
-                    data = con.u.d = con.u = Data[Co, Ca](
-                        candidate=can, constraint=con, u=con.u, d=con
-                    )
-                else:
-                    data = con.u.d = con.u = data.l.r = data.r.l = Data[Co, Ca](
-                        candidate=can, constraint=con, u=con.u, d=con, l=data, r=data.r
-                    )
+                con = self.root.constraints[v]
+                con.u.d = con.u = data.r.l = data.r = data = Data(
+                    candidate=can, constraint=con, u=con.u, d=con, l=data, r=data.r
+                )
                 con.size += 1
-            if data is not None:
-                can.r = can.l = data
+
+            can.l.r = can.r
+            can.r.l = can.l
 
     def __search(self, O=deque[Ca]()) -> Generator[tuple[Ca], Any | None, Any | None]:
         if self.root.r == self.root:
