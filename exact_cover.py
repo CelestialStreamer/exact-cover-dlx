@@ -177,7 +177,14 @@ class ExactCover[Co, Ca]:
             data: Data[Co, Ca] = can
             for v in constraint_set:
                 # Lookup constraint by value
-                con = self.root.constraints[v]
+                try:
+                    con = root.constraints[v]
+                except KeyError as e:
+                    message = (
+                        f"Values for candidate {candidate!r} are not a subset of constraints."
+                        f" {constraint_set} contains unknown constraint value: {v}"
+                    )
+                    raise TypeError(message) from e
                 # Append to column: con.d.u = con.d = Data(u=con, d=con.d)
                 # Append to row: data.r.l = data.r = Data(l=data, r=data.r)
                 con.u.d = con.u = data.r.l = data.r = data = Data(
