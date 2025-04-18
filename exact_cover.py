@@ -154,6 +154,7 @@ class ExactCover[Co, Ca]:
         self,
         constraints: Iterable[Co],
         candidates: Iterable[tuple[Ca, Iterable[Co]]],
+        optional_constraints: Iterable[Co] = None,
     ):
         self.root = root = Root[Co, Ca]()
 
@@ -165,6 +166,16 @@ class ExactCover[Co, Ca]:
             root.constraints[v] = con.r.l = con.r = con = Constraint[Co, Ca](
                 value=v, l=con, r=con.r
             )
+
+        if optional_constraints:
+            for v in optional_constraints:
+                # Optional constraints are similar to constraints, with the
+                # exception that they are not linked to the other required headers.
+                # Candidates may still cover these optional constraints, but
+                # the search algorithm will skip these otherwise.
+                root.constraints[v] = Constraint(
+                    value=v, l=None, r=None
+                )
 
         can: Candidate[Co, Ca] = root
         for candidate, constraint_set in candidates:
