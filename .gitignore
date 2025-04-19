@@ -1,6 +1,9 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 
+# Poetry
+poetry.lock
+
 # Environments
 .venv
 venv/

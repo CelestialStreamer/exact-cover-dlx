@@ -163,9 +163,7 @@ class ExactCover[Co, Ca]:
             # Constraints are the column headers of our matrix.
             # Constraint is saved in root for convenience.
             # Append to row: col.r.l = col.r = Constraint(l=con, r=con.r)
-            root.constraints[v] = con.r.l = con.r = con = Constraint[Co, Ca](
-                value=v, l=con, r=con.r
-            )
+            root.constraints[v] = con.r.l = con.r = con = Constraint[Co, Ca](value=v, l=con, r=con.r)
 
         if optional_constraints:
             for v in optional_constraints:
@@ -173,18 +171,14 @@ class ExactCover[Co, Ca]:
                 # exception that they are not linked to the other required headers.
                 # Candidates may still cover these optional constraints, but
                 # the search algorithm will skip these otherwise.
-                root.constraints[v] = Constraint(
-                    value=v, l=None, r=None
-                )
+                root.constraints[v] = Constraint(value=v, l=None, r=None)
 
         can: Candidate[Co, Ca] = root
         for candidate, constraint_set in candidates:
             # Candidates are the row headers of our matrix.
             # Candidate is saved in root for use in searching when given initial values.
             # Append to column: can.d.u = can.d = Candidate(u=can, d=can.d)
-            root.candidates[candidate] = can.d.u = can.d = can = Candidate(
-                value=candidate, u=can, d=can.d
-            )
+            root.candidates[candidate] = can.d.u = can.d = can = Candidate(value=candidate, u=can, d=can.d)
             data: Data[Co, Ca] = can
             for v in constraint_set:
                 # Lookup constraint by value
@@ -241,9 +235,7 @@ class ExactCover[Co, Ca]:
     def search(self, initial: Iterable[Ca] = list[Ca]()):
         initial = deque(initial)
         covered = deque(
-            data.constraint.cover()
-            for candidate in initial
-            for data in self.root.candidates[candidate].right()
+            data.constraint.cover() for candidate in initial for data in self.root.candidates[candidate].right()
         )
 
         try:
