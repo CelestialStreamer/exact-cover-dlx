@@ -19,6 +19,9 @@ dependencies = [
 line-length = 120
 
 [tool.poetry]
+packages = [
+  {include = "*", from = "src"}
+]
 
 [tool.poetry.group.dev.dependencies]
 numpy = "^2.2.4"
