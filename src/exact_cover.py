@@ -1,5 +1,5 @@
 from collections import deque
-from typing import Iterable, Optional, Self
+from typing import Generator, Iterable, Optional, Self
 
 __all__ = ["ExactCover"]
 
@@ -208,9 +208,9 @@ class ExactCover[Co, Ca]:
         #     con.d.u = con.u
         #     con.u.d = con.d
 
-    def __search(self, O: deque[Ca]):
+    def __search(self, O: deque[Ca]) -> Generator[set[Ca]]:
         if self.root.r == self.root:
-            return (yield tuple(O))
+            return (yield set(O))
 
         response = None
         # Cover constraint with fewest candidates to minimize branching
