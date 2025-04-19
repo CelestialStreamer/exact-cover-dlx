@@ -242,8 +242,8 @@ class ExactCover[Co, Ca]:
         constraint.uncover()
         return response
 
-    def search(self, initial: Iterable[Ca] = list[Ca]()):
-        initial = deque(initial)
+    def search(self, initial: Iterable[Ca] = None):
+        initial = deque(initial or [])
         covered = deque(
             data.constraint.cover() for candidate in initial for data in self.root.candidates[candidate].right()
         )
