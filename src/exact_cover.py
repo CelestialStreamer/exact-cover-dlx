@@ -1,5 +1,5 @@
 from collections import deque
-from typing import Generator, Iterable, Optional, Self
+from typing import Generator, Iterable, Optional, Self, overload
 
 __all__ = ["ExactCover"]
 
@@ -150,6 +150,14 @@ class Root[Ca, Co](Data[Ca, Co]):
 
 
 class ExactCover[Co, Ca]:
+    @overload
+    def __init__(
+        self,
+        constraints: Iterable[Co],
+        candidates: dict[Ca, Iterable[Co]],
+        optional_constraints: Iterable[Co] = None,
+    ): ...
+
     def __init__(
         self,
         constraints: Iterable[Co],
@@ -174,6 +182,8 @@ class ExactCover[Co, Ca]:
                 root.constraints[v] = Constraint(value=v, l=None, r=None)
 
         can: Candidate[Co, Ca] = root
+        if isinstance(candidates, dict):
+            candidates = candidates.items()
         for candidate, constraint_set in candidates:
             # Candidates are the row headers of our matrix.
             # Candidate is saved in root for use in searching when given initial values.
