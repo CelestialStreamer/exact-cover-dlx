@@ -100,4 +100,6 @@ if __name__ == "__main__":
         help="Number of solutions to print. Default is 100. Pass -1 to print all solutions.",
     )
     args = parser.parse_args()
+    if args.N == -1:
+        args.N = None
     main(**vars(args))
