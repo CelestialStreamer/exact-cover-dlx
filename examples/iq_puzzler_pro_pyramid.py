@@ -11,6 +11,29 @@ except ImportError as e:
     exit(1)
 
 
+PRINT_TEMPLATE = """
+    {55}
+
+   {51} {52}
+   {53} {54}
+
+  {42} {43} {44}
+  {45} {46} {47}
+  {48} {49} {50}
+
+ {26} {27} {28} {29}
+ {30} {31} {32} {33}
+ {34} {35} {36} {37}
+ {38} {39} {40} {41}
+
+{01} {02} {03} {04} {05}
+{06} {07} {08} {09} {10}
+{11} {12} {13} {14} {15}
+{16} {17} {18} {19} {20}
+{21} {22} {23} {24} {25}
+"""
+
+
 def main(N: int, format: str):
     """
     The game IQ Puzzle Pro game consists of 12 polyominos of different sizes.
@@ -232,33 +255,25 @@ def main(N: int, format: str):
 
     start = datetime.now()
     for n, solution in enumerate(itertools.islice(engine.search(), N), start=1):
-        if format == "pretty":
-            print(f"{datetime.now() - start} {n:>6,}")
-
-            # For each cell, get its label, reverse the order to draw aesthetically
-            i = iter(
-                label
-                for _, label in sorted(
-                    ((cell, label) for label, cells in solution for cell in cells),
-                    reverse=True,
+        match format:
+            case "pretty":
+                print(f"{datetime.now() - start} {n:>6,}")
+                print(
+                    PRINT_TEMPLATE.format(
+                        None,
+                        *(label for _, label in sorted((cell, label) for label, cells in solution for cell in cells)),
+                    )
                 )
-            )
 
-            for level in range(1, 6):
-                for _ in range(level):
-                    print(" " * (5 - level), end="")
-                    for _ in range(level):
-                        print(f" {next(i)}", end="")
-                    print()
-                print()
-        elif format == "simple":
-            print(
-                f"{datetime.now() - start} {n:>6,}",
-                " ".join(f"{label}:{set(cells)}" for label, cells in sorted(solution)),
-            )
-        elif format == "dense":
-            formatted = ",".join(str(cell) for (_, cells) in sorted(solution) for cell in cells)
-            print(f"{datetime.now() - start} {n:>6,}", formatted)
+            case "simple":
+                print(
+                    f"{datetime.now() - start} {n:>6,}",
+                    " ".join(f"{label}:{set(cells)}" for label, cells in sorted(solution)),
+                )
+
+            case "dense":
+                formatted = ",".join(str(cell) for (_, cells) in sorted(solution) for cell in cells)
+                print(f"{datetime.now() - start} {n:>6,}", formatted)
 
 
 if __name__ == "__main__":
