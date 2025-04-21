@@ -25,7 +25,7 @@ PRINT_TEMPLATE = """
 
 def main(N: int, format: str):
     """
-    The game IQ Puzzle Pro game consists of 12 polyominos of different sizes.
+    The IQ Puzzle Pro game consists of 12 polyominos of different sizes.
 
     The 12 pieces are:
 
